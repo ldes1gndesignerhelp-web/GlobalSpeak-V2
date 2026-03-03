@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vox · Voice Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Экран ввода кода доступа -->
+    <div id="access-screen" class="screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>vox</span>
+                </div>
+                <h1>Закрытый доступ</h1>
+                <p class="subtitle">Введите код для входа в приложение</p>
+            </div>
+
+            <div class="auth-form">
+                <div class="input-group">
+                    <label for="access-code-input">Код доступа</label>
+                    <input type="password" id="access-code-input" placeholder="••••••••••••" autocomplete="off">
+                </div>
+
+                <div class="room-actions">
+                    <button id="submit-access-btn" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 12H4M12 4l8 8-8 8"/>
+                        </svg>
+                        Войти
+                    </button>
+                </div>
+
+                <div id="access-error" class="error-message hidden"></div>
+            </div>
+
+            <div class="auth-footer">
+                <p>© 2024 Vox · Приватные голосовые комнаты</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран входа в комнату -->
+    <div id="join-screen" class="screen hidden">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>vox</span>
+                </div>
+                <h1>Личный разговор</h1>
+                <p class="subtitle">Комната на двоих. Только вы и ваш собеседник.</p>
+            </div>
+
+            <div class="auth-form">
+                <div class="input-group">
+                    <label for="username-input">Ваше имя</label>
+                    <input type="text" id="username-input" placeholder="Анна" autocomplete="off" maxlength="20">
+                </div>
+
+                <div class="divider">
+                    <span>или</span>
+                </div>
+
+                <div class="room-actions">
+                    <button id="create-room-btn" class="btn btn-primary" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Создать комнату
+                    </button>
+
+                    <div class="join-section">
+                        <input type="text" id="room-id-input" placeholder="Код комнаты" autocomplete="off" maxlength="6">
+                        <button id="join-room-btn" class="btn btn-secondary" disabled>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 12H4M12 4l8 8-8 8"/>
+                            </svg>
+                            Войти
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <p>© 2024 Vox · Приватные голосовые комнаты</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран звонка -->
+    <div id="call-screen" class="screen hidden">
+        <div class="call-layout">
+            <!-- Основная область с участниками -->
+            <div class="main-area">
+                <div class="room-header">
+                    <div class="room-info">
+                        <div class="room-badge">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 8v8M8 12h8"/>
+                            </svg>
+                            <span id="room-id-display"></span>
+                        </div>
+                        <button id="copy-room-btn" class="icon-button" title="Копировать код комнаты">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="connection-status" id="connection-status">
+                        <div class="status-dot connected"></div>
+                        <span>Подключено</span>
+                    </div>
+                </div>
+
+                <!-- Контейнер с участниками -->
+                <div class="participants-grid">
+                    <!-- Локальный участник (вы) -->
+                    <div class="participant-tile" id="local-participant-tile">
+                        <div class="participant-avatar-large" id="local-avatar-large">A</div>
+                        <div class="participant-name-tag">
+                            <span class="participant-name" id="local-name-display"></span>
+                            <span class="participant-badge">(вы)</span>
+                        </div>
+                        <div class="voice-indicator" id="local-voice-indicator"></div>
+                    </div>
+
+                    <!-- Удаленный участник (друг) -->
+                    <div class="participant-tile remote-tile waiting" id="remote-participant-tile">
+                        <div class="participant-avatar-large" id="remote-avatar-large">?</div>
+                        <div class="participant-name-tag">
+                            <span class="participant-name" id="remote-name-display">Ожидание...</span>
+                        </div>
+                        <div class="voice-indicator" id="remote-voice-indicator"></div>
+                    </div>
+                </div>
+
+                <!-- Панель управления -->
+                <div class="control-panel">
+                    <div class="controls-center">
+                        <button id="toggle-audio" class="control-btn audio-on" title="Отключить микрофон">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                                <line x1="3" y1="11" x2="21" y2="11"/>
+                            </svg>
+                        </button>
+                        
+                        <button id="leave-call" class="control-btn leave" title="Завершить звонок">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 10a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Система уведомлений -->
+    <div id="notification" class="notification hidden">
+        <span id="notification-message"></span>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
